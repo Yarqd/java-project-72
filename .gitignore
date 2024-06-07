@@ -9,4 +9,4 @@ jte-classes
 *.settings
 .factorypath
 bin
-.classpath
+.classpath.idea/
