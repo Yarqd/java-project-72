@@ -1,0 +1,13 @@
+services:
+- type: web
+  name: java-project-72
+  env: java
+  plan: free
+  buildCommand: ./gradlew build
+  startCommand: java -jar build/libs/java-project-72-all.jar
+  envVars:
+    - key: JAVA_VERSION
+      value: 21
+    - key: PORT
+      value: 7070
+
