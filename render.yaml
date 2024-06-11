@@ -3,11 +3,13 @@ services:
     name: java-project
     env: java
     plan: free
-    buildCommand: ./gradlew build
+    buildCommand: |
+      export JAVA_HOME=/opt/render/project/src/.jdk
+      ./gradlew build
     startCommand: java -jar build/libs/java-project-72-all.jar
     envVars:
       - key: JAVA_VERSION
-        value: 21
+        value: 17
       - key: PORT
         value: 7070
       - key: JDBC_DATABASE_URL
