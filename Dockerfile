@@ -4,7 +4,6 @@ WORKDIR /app
 
 COPY app/gradlew /app/gradlew
 COPY app/gradle /app/gradle
-
 RUN chmod +x ./gradlew
 
 COPY app /app

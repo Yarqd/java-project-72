@@ -7,6 +7,8 @@ import io.javalin.Javalin;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) {
