@@ -1,26 +1,67 @@
 package hexlet.code;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.javalin.Javalin;
 
-public class App {
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 
-    // Метод, который возвращает настроенное приложение Javalin
-    public static Javalin getApp() {
-        return Javalin.create(config -> {
-            // Включаем логирование запросов для разработки
+public class App {
+    public static void main(String[] args) {
+        String databaseUrl = System.getenv().getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1");
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(databaseUrl);
+
+        if (databaseUrl.contains("h2")) {
+            config.setDriverClassName("org.h2.Driver");
+            config.setUsername("sa");
+            config.setPassword("");
+        } else {
+            config.setDriverClassName("org.postgresql.Driver");
+            config.setUsername(System.getenv().getOrDefault("DB_USERNAME", "postgres"));
+            config.setPassword(System.getenv().getOrDefault("DB_PASSWORD", "password"));
+        }
+
+        HikariDataSource dataSource = new HikariDataSource(config);
+
+        if (databaseUrl.contains("h2")) {
+            initializeDatabase(dataSource);
+        }
+
+        Javalin app = getApp(dataSource);
+        app.start(getPort());
+    }
+
+    public static Javalin getApp(DataSource dataSource) {
+        Javalin app = Javalin.create(config -> {
             config.requestLogger.http((ctx, executionTimeMs) -> {
                 System.out.println(ctx.method() + " " + ctx.path() + " took " + executionTimeMs + " ms");
             });
-        }).get("/", ctx -> ctx.result("Hello World"));
+        });
+
+        app.get("/", ctx -> ctx.result("Hello World"));
+        return app;
     }
 
-    // Статический метод main() для запуска приложения
-    public static void main(String[] args) {
-        Javalin app = getApp(); // Получаем настроенное приложение
-        app.start(getPort()); // Запускаем приложение на порту
+    private static void initializeDatabase(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+
+            String sql = "CREATE TABLE IF NOT EXISTS urls ("
+                    + "id IDENTITY PRIMARY KEY, "
+                    + "name VARCHAR(255) NOT NULL, "
+                    + "created_at TIMESTAMP NOT NULL"
+                    + ")";
+            statement.executeUpdate(sql);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    // Метод для получения порта из переменной окружения или использование порта 7070 по умолчанию
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
         return Integer.parseInt(port);
