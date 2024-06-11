@@ -4,9 +4,11 @@ services:
     env: java
     plan: free
     buildCommand: |
+      export JAVA_HOME=/opt/render/project/.jdk
       cd app
       ./gradlew build
     startCommand: |
+      export JAVA_HOME=/opt/render/project/.jdk
       cd app
       java -jar build/libs/java-project-72-all.jar
   envVars:
