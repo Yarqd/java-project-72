@@ -3,7 +3,7 @@ services:
     name: java-project
     env: docker
     plan: free
-    dockerfilePath: Dockerfile  # Убедитесь, что путь корректен
+    dockerfilePath: app/Dockerfile
     envVars:
       - key: PORT
         value: 7070
