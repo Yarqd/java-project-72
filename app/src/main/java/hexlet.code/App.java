@@ -42,6 +42,22 @@ public class App {
             });
         });
 
+        UrlRepository urlRepository = new UrlRepository(dataSource);
+
+        app.post("/urls", ctx -> {
+            String urlName = ctx.formParam("url");
+            Url url = new Url();
+            url.setName(urlName);
+            url.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            urlRepository.addUrl(url);
+            ctx.result("URL добавлен: " + urlName);
+        });
+
+        app.get("/urls", ctx -> {
+            List<Url> urls = urlRepository.getAllUrls();
+            ctx.json(urls);
+        });
+
         app.get("/", ctx -> ctx.result("Hello World"));
         return app;
     }
