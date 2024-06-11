@@ -3,9 +3,9 @@ services:
     name: java-project
     env: docker
     plan: free
-    dockerfilePath: Dockerfile
+    dockerfilePath: app/Dockerfile  # Убедитесь, что путь корректен
     envVars:
       - key: PORT
         value: 7070
       - key: JDBC_DATABASE_URL
-        value: postgres://project_db_2ary_user:pG5r8m1zVPE31lgLW8sSgZd99yhL8GbD@dpg-cpk3eemd3nmc73fnvphg-a.oregon-postgres.render.com/project_db_2ary
+        value: postgres://project_db_2ary_user:password@dpg-cpk3eemd3nmc73fnvphg-a.oregon-postgres.render.com/project_db_2ary
