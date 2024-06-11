@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 @Getter
 @Setter
 public class BaseRepository {
-    private DataSource dataSource;
+    protected DataSource dataSource;
 
     public BaseRepository(@NonNull DataSource ds) {
         this.dataSource = ds;
