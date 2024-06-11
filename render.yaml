@@ -4,9 +4,11 @@ services:
     env: java
     plan: free
     buildCommand: |
-      export JAVA_HOME=/opt/render/project/src/.jdk
+      cd app
       ./gradlew build
-    startCommand: java -jar build/libs/java-project-72-all.jar
+    startCommand: |
+      cd app
+      java -jar build/libs/java-project-72-all.jar
     envVars:
       - key: JAVA_VERSION
         value: 17
@@ -14,3 +16,4 @@ services:
         value: 7070
       - key: JDBC_DATABASE_URL
         value: postgres://project_db_2ary_user:pG5r8m1zVPE31lgLW8sSgZd99yhL8GbD@dpg-cpk3eemd3nmc73fnvphg-a.oregon-postgres.render.com/project_db_2ary
+  ostgres://project_db_2ary_user:pG5r8m1zVPE31lgLW8sSgZd99yhL8GbD@dpg-cpk3eemd3nmc73fnvphg-a.oregon-postgres.render.com/project_db_2ary
