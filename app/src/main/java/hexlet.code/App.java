@@ -3,6 +3,10 @@ package hexlet.code;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.javalin.Javalin;
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.resolve.ResourceCodeResolver;
+import io.javalin.rendering.template.JavalinJte;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -11,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class App {
+
     public static void main(String[] args) {
         String databaseUrl = System.getenv().getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1");
 
@@ -42,6 +47,7 @@ public class App {
             config.requestLogger.http((ctx, executionTimeMs) -> {
                 System.out.println(ctx.method() + " " + ctx.path() + " took " + executionTimeMs + " ms");
             });
+            config.fileRenderer(new JavalinJte(createTemplateEngine()));
         });
 
         UrlRepository urlRepository = new UrlRepository(dataSource);
@@ -60,7 +66,10 @@ public class App {
             ctx.json(urls);
         });
 
-        app.get("/", ctx -> ctx.result("Hello World"));
+        app.get("/", ctx -> {
+            ctx.render("index.jte", Map.of("message", "Привет, мир!"));
+        });
+
         return app;
     }
 
@@ -83,5 +92,11 @@ public class App {
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
         return Integer.parseInt(port);
+    }
+
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        return TemplateEngine.create(codeResolver, ContentType.Html);
     }
 }
