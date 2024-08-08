@@ -9,6 +9,7 @@ import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +60,7 @@ public class UrlController {
             }
         } catch (java.net.MalformedURLException e) {
             LOGGER.error("Некорректный URL", e);
-            ctx.sessionAttribute("flash", "Некорректный URL");
-            ctx.sessionAttribute("flashType", "error");
-            ctx.redirect("/urls");
+            ctx.status(400).result("Некорректный URL");
         }
     }
 
@@ -102,6 +101,9 @@ public class UrlController {
         long id = Long.parseLong(ctx.pathParam("id"));
         try {
             Url url = URL_REPOSITORY.findById(id);
+            if (url == null) {
+                throw new NotFoundResponse("URL не найден");
+            }
             List<UrlCheck> checks = URL_CHECK_REPOSITORY.findByUrlId(id);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             List<UrlCheckDto> formattedChecks = checks.stream().map(check -> new UrlCheckDto(
@@ -114,24 +116,18 @@ public class UrlController {
                     check.getCreatedAt().toLocalDateTime().format(formatter)
             )).collect(Collectors.toList());
 
-            if (url != null) {
-                UrlDto urlDto = new UrlDto(
-                        url.getId(),
-                        url.getName(),
-                        checks.isEmpty() ? "Не проверялось" : checks.get(0).getCreatedAt().
-                                toLocalDateTime().format(formatter),
-                        checks.isEmpty() ? null : checks.get(0).getStatusCode()
-                );
+            UrlDto urlDto = new UrlDto(
+                    url.getId(),
+                    url.getName(),
+                    checks.isEmpty() ? "Не проверялось" : checks.get(0).getCreatedAt().
+                            toLocalDateTime().format(formatter),
+                    checks.isEmpty() ? null : checks.get(0).getStatusCode()
+            );
 
-                BasePage page = new BasePage(ctx.sessionAttribute("flash"),
-                        ctx.sessionAttribute("flashType"));
-                ctx.render("urls/show.jte", model("page", page,
-                        "url", urlDto, "checks", formattedChecks));
-            } else {
-                ctx.sessionAttribute("flash", "URL не найден");
-                ctx.sessionAttribute("flashType", "error");
-                ctx.redirect("/urls");
-            }
+            BasePage page = new BasePage(ctx.sessionAttribute("flash"),
+                    ctx.sessionAttribute("flashType"));
+            ctx.render("urls/show.jte", model("page", page,
+                    "url", urlDto, "checks", formattedChecks));
         } catch (SQLException e) {
             LOGGER.error("Ошибка при получении URL", e);
             ctx.sessionAttribute("flash", "Ошибка при получении URL: " + e.getMessage());
