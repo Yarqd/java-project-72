@@ -11,6 +11,15 @@ public final class Url {
     private String name;
     private Timestamp createdAt;
 
+    public Url() {
+    }
+
+    public Url(long id, String name, Timestamp createdAt) {
+        this.id = id;
+        this.name = name;
+        this.createdAt = createdAt;
+    }
+
     public long getId() {
         return id;
     }
