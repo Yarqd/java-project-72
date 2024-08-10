@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -63,7 +64,16 @@ public class App {
     }
 
     private static TemplateEngine createTemplateEngine() {
-        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(Paths.get("src/main/jte"));
+        String basePath = Paths.get("").toAbsolutePath().toString();
+        Path templatesPath;
+
+        if (basePath.endsWith("app")) {
+            templatesPath = Paths.get("src/main/jte"); // Для локальной среды
+        } else {
+            templatesPath = Paths.get("app/src/main/jte"); // Для GitHub Actions
+        }
+
+        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(templatesPath);
         TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
         LOGGER.info("Creating TemplateEngine with base path: " + codeResolver.getRoot());
         return templateEngine;
