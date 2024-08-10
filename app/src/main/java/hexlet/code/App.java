@@ -70,7 +70,7 @@ public class App {
         if (basePath.endsWith("app")) {
             templatesPath = Paths.get("src/main/jte"); // Для локальной среды
         } else {
-            templatesPath = Paths.get("app/src/main/jte"); // Для GitHub Actions
+            templatesPath = Paths.get(""); // Для GitHub Actions
         }
 
         DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(templatesPath);
