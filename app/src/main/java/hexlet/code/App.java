@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -65,34 +63,11 @@ public class App {
     }
 
     private static TemplateEngine createTemplateEngine() {
-        String basePath = Paths.get("").toAbsolutePath().toString();
-        Path templatesPath;
-
-        LOGGER.info("Current base path: " + basePath);
-
-        if (basePath.endsWith("app")) {
-            templatesPath = Paths.get("src/main/jte"); // Локальная среда
-            LOGGER.info("Detected local environment. Using templates path: src/main/jte");
-        } else {
-            templatesPath = Paths.get("app/src/main/jte"); // Для GitHub Actions
-            LOGGER.info("Detected CI environment. Using templates path: app/src/main/jte");
-        }
-
-        // Логируем наличие файла .jteroot
-        if (Files.exists(templatesPath.resolve(".jteroot"))) {
-            LOGGER.info(".jteroot file found at: " + templatesPath.resolve(".jteroot"));
-        } else {
-            LOGGER.error(".jteroot file NOT found at: " + templatesPath.resolve(".jteroot"));
-        }
-
-        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(templatesPath);
+        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(Paths.get("src/main/jte"));
         TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
         LOGGER.info("Creating TemplateEngine with base path: " + codeResolver.getRoot());
-
         return templateEngine;
     }
-
-
 
     public static DataSource getDataSource() {
         return DATA_SOURCE;

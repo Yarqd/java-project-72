@@ -22,11 +22,3 @@ jobs:
         uses: hexlet/project-action@release
         with:
           hexlet-id: ${{ secrets.HEXLET_ID }}
-
-      # Добавляем шаг для вывода текущей директории
-      - name: Print current directory
-        run: pwd
-
-      # Добавляем шаг для вывода структуры файлов
-      - name: List files
-        run: ls -R
