@@ -112,3 +112,12 @@ tasks.named('startShadowScripts') {
 tasks.named('jar') {
     enabled = false
 }
+
+// Новая задача для отображения структуры файлов проекта (если потребуется)
+task printProjectStructure {
+    doLast {
+        fileTree(dir: projectDir).visit {
+            println it.relativePath
+        }
+    }
+}
