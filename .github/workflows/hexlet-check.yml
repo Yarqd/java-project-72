@@ -18,19 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show current working directory
-        run: pwd
-
-      - name: List root directory contents
-        run: ls -al
-
-      - name: List app directory contents
-        run: ls -al ./app
-
-      - name: List template directory contents
-        run: ls -al ./app/src/main/jte
-
       - name: Hexlet project check
         uses: hexlet/project-action@release
         with:
           hexlet-id: ${{ secrets.HEXLET_ID }}
+
+      # Добавляем шаг для вывода текущей директории
+      - name: Print current directory
+        run: pwd
+
+      # Добавляем шаг для вывода структуры файлов
+      - name: List files
+        run: ls -R
