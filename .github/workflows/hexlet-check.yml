@@ -18,9 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Print Project Structure
-        run: find . -type f | sort
-
       - name: Hexlet project check
         uses: hexlet/project-action@release
         with:
