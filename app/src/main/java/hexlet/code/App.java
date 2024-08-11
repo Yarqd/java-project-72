@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -63,11 +64,17 @@ public class App {
     }
 
     private static TemplateEngine createTemplateEngine() {
-        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(Paths.get("src/main/jte"));
+        // Используем абсолютный путь к директории jte
+        Path templatesPath = Paths.get("src/main/jte").toAbsolutePath();
+        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(templatesPath);
         TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
+
+        // Логируем абсолютный путь, чтобы убедиться, что он правильно настроен
         LOGGER.info("Creating TemplateEngine with base path: " + codeResolver.getRoot());
+
         return templateEngine;
     }
+
 
     public static DataSource getDataSource() {
         return DATA_SOURCE;
