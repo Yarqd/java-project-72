@@ -59,7 +59,6 @@ class AppTest {
         Url url = new Url(1L, "http://example.com", new Timestamp(System.currentTimeMillis()));
         lenient().when(urlRepository.findById(anyLong())).thenReturn(url);
         lenient().when(urlRepository.findAll()).thenReturn(List.of(url));
-        lenient().when(urlRepository.existsByName(any())).thenReturn(false);
     }
 
     @Test
