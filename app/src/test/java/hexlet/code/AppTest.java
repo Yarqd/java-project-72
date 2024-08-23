@@ -2,11 +2,15 @@ package hexlet.code;
 
 import hexlet.code.controllers.UrlController;
 import hexlet.code.model.Url;
+//import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlRepository;
+import hexlet.code.repository.UrlCheckRepository;
 import io.javalin.Javalin;
+//import io.javalin.testtools.JavalinTest;
 import io.restassured.RestAssured;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.response.Response;
+//import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +27,11 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.RedirectConfig.redirectConfig;
+//import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
+//import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AppTest {
@@ -34,6 +40,9 @@ class AppTest {
 
     @Mock
     private UrlRepository urlRepository;
+
+    @Mock
+    private UrlCheckRepository urlCheckRepository;
 
     @InjectMocks
     private UrlController urlController;
@@ -144,4 +153,28 @@ class AppTest {
 
         assertEquals(302, response.getStatusCode());
     }
+
+//    @Test
+//    void testCreateUrl2() throws SQLException {
+//        // Подготавливаем фейковый URL
+//        MockWebServer mockServer = new MockWebServer();
+//        String url = mockServer.url("/").toString().replaceAll("/$", "");
+//
+//        // Мокируем поведение репозитория для метода existsByName
+//        when(urlRepository.existsByName(url)).thenReturn(false);
+//
+//        // Отправляем POST запрос с фейковым URL
+//        Response response = given()
+//                .formParam("url", url)
+//                .post("/urls");
+//
+//        // Проверяем статус ответа
+//        assertEquals(302, response.getStatusCode());
+//
+//        // Проверяем, что URL был сохранен
+//        Url actualUrl = urlRepository.findById(1L);
+//        assertThat(actualUrl).isNotNull();
+//        assertThat(actualUrl.getName()).isEqualTo(url);
+//    }
+
 }
