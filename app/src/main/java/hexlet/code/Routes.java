@@ -4,12 +4,23 @@ import io.javalin.Javalin;
 import hexlet.code.controllers.UrlCheckController;
 import hexlet.code.controllers.UrlController;
 import hexlet.code.dto.BasePage;
+import hexlet.code.repository.UrlRepository;
+import hexlet.code.repository.UrlCheckRepository;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public final class Routes {
 
     public static void configure(Javalin app) {
+        // Создаем репозитории с передачей DataSource
+        var dataSource = DatabaseConfig.getDataSource();
+        UrlRepository urlRepository = new UrlRepository(dataSource);
+        UrlCheckRepository urlCheckRepository = new UrlCheckRepository(dataSource);
+
+        // Создаем контроллеры с передачей соответствующих репозиториев
+        UrlController urlController = new UrlController(urlRepository, urlCheckRepository);
+        UrlCheckController urlCheckController = new UrlCheckController(urlCheckRepository, urlRepository);
+
         app.get("/", ctx -> {
             String flashMessage = ctx.sessionAttribute("flash");
             String flashType = ctx.sessionAttribute("flashType");
@@ -23,10 +34,10 @@ public final class Routes {
             ctx.status(204); // No Content
         });
 
-        app.post("/urls", UrlController::addUrl);
-        app.get("/urls", UrlController::listUrls);
-        app.get("/urls/{id}", UrlController::showUrl);
-        app.post("/urls/{id}/checks", UrlCheckController::checkUrl);
+        app.post("/urls", urlController::addUrl);
+        app.get("/urls", urlController::listUrls);
+        app.get("/urls/{id}", urlController::showUrl);
+        app.post("/urls/{id}/checks", urlCheckController::checkUrl);
     }
 
     public static String rootPath() {

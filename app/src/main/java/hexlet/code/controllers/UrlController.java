@@ -1,6 +1,5 @@
 package hexlet.code.controllers;
 
-import hexlet.code.DatabaseConfig;
 import hexlet.code.dto.BasePage;
 import hexlet.code.dto.UrlCheckDto;
 import hexlet.code.dto.UrlDto;
@@ -13,6 +12,8 @@ import io.javalin.http.NotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
@@ -23,21 +24,24 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class UrlController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlController.class);
-    private static final UrlRepository URL_REPOSITORY = new UrlRepository(DatabaseConfig.getDataSource());
-    private static final UrlCheckRepository URL_CHECK_REPOSITORY = new UrlCheckRepository(
-            DatabaseConfig.getDataSource());
+    private final UrlRepository urlRepository;
+    private final UrlCheckRepository urlCheckRepository;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public static void addUrl(Context ctx) {
+    public UrlController(UrlRepository urlRepository, UrlCheckRepository urlCheckRepository) {
+        this.urlRepository = urlRepository;
+        this.urlCheckRepository = urlCheckRepository;
+    }
+
+    public void addUrl(Context ctx) {
         String inputUrl = ctx.formParam("url");
 
         try {
-            java.net.URL url = new java.net.URL(inputUrl);
-            String domainUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == -1 ? "" : ":"
-                    + url.getPort());
+            URL url = new URL(inputUrl);
+            String domainUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == -1 ? "" : ":" + url.getPort());
 
             try {
-                if (URL_REPOSITORY.existsByName(domainUrl)) {
+                if (urlRepository.existsByName(domainUrl)) {
                     ctx.sessionAttribute("flash", "Страница уже существует");
                     ctx.sessionAttribute("flashType", "error");
                     ctx.redirect("/urls");
@@ -47,7 +51,7 @@ public class UrlController {
                 Url newUrl = new Url();
                 newUrl.setName(domainUrl);
                 newUrl.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-                URL_REPOSITORY.save(newUrl);
+                urlRepository.save(newUrl);
 
                 ctx.sessionAttribute("flash", "Страница успешно добавлена");
                 ctx.sessionAttribute("flashType", "success");
@@ -58,18 +62,18 @@ public class UrlController {
                 ctx.sessionAttribute("flashType", "error");
                 ctx.redirect("/urls");
             }
-        } catch (java.net.MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOGGER.error("Некорректный URL", e);
             ctx.status(400).result("Некорректный URL");
         }
     }
 
-    public static void listUrls(Context ctx) {
+    public void listUrls(Context ctx) {
         try {
-            List<Url> urls = URL_REPOSITORY.findAll();
+            List<Url> urls = urlRepository.findAll();
             List<UrlDto> urlsWithChecks = urls.stream().map(url -> {
                 try {
-                    UrlCheck latestCheck = URL_CHECK_REPOSITORY.findLatestByUrlId(url.getId());
+                    UrlCheck latestCheck = urlCheckRepository.findLatestByUrlId(url.getId());
                     return new UrlDto(
                             url.getId(),
                             url.getName(),
@@ -97,14 +101,14 @@ public class UrlController {
         }
     }
 
-    public static void showUrl(Context ctx) {
+    public void showUrl(Context ctx) {
         long id = Long.parseLong(ctx.pathParam("id"));
         try {
-            Url url = URL_REPOSITORY.findById(id);
+            Url url = urlRepository.findById(id);
             if (url == null) {
                 throw new NotFoundResponse("URL не найден");
             }
-            List<UrlCheck> checks = URL_CHECK_REPOSITORY.findByUrlId(id);
+            List<UrlCheck> checks = urlCheckRepository.findByUrlId(id);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             List<UrlCheckDto> formattedChecks = checks.stream().map(check -> new UrlCheckDto(
                     check.getId(),
@@ -124,10 +128,8 @@ public class UrlController {
                     checks.isEmpty() ? null : checks.get(0).getStatusCode()
             );
 
-            BasePage page = new BasePage(ctx.sessionAttribute("flash"),
-                    ctx.sessionAttribute("flashType"));
-            ctx.render("urls/show.jte", model("page", page,
-                    "url", urlDto, "checks", formattedChecks));
+            BasePage page = new BasePage(ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
+            ctx.render("urls/show.jte", model("page", page, "url", urlDto, "checks", formattedChecks));
         } catch (SQLException e) {
             LOGGER.error("Ошибка при получении URL", e);
             ctx.sessionAttribute("flash", "Ошибка при получении URL: " + e.getMessage());
