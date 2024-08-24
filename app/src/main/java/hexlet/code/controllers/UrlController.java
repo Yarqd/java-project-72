@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
-public class UrlController {
+public final class UrlController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlController.class);
     private final UrlRepository urlRepository;
     private final UrlCheckRepository urlCheckRepository;
@@ -38,7 +38,8 @@ public class UrlController {
 
         try {
             URL url = new URL(inputUrl);
-            String domainUrl = url.getProtocol() + "://" + url.getHost() + (url.getPort() == -1 ? "" : ":" + url.getPort());
+            String domainUrl = url.getProtocol() + "://" + url.getHost()
+                    + (url.getPort() == -1 ? "" : ":" + url.getPort());
 
             try {
                 if (urlRepository.existsByName(domainUrl)) {
