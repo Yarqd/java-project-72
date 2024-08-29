@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public final class UrlCheckRepository extends BaseRepository {
         String sql = "INSERT INTO url_checks (status_code, title, h1, description, url_id, created_at)"
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, urlCheck.getStatusCode());
             stmt.setString(2, urlCheck.getTitle());
             stmt.setString(3, urlCheck.getH1());
@@ -28,8 +29,16 @@ public final class UrlCheckRepository extends BaseRepository {
             stmt.setLong(5, urlCheck.getUrlId());
             stmt.setTimestamp(6, urlCheck.getCreatedAt());
             stmt.executeUpdate();
+
+            // Получение сгенерированного ID
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    urlCheck.setId(generatedKeys.getLong(1));
+                }
+            }
         }
     }
+
 
     public List<UrlCheck> findByUrlId(long urlId) throws SQLException {
         List<UrlCheck> urlChecks = new ArrayList<>();
@@ -41,14 +50,14 @@ public final class UrlCheckRepository extends BaseRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     UrlCheck urlCheck = new UrlCheck(
-                            rs.getLong("url_id"),
+                            rs.getLong("id"),  // Здесь используется правильный порядок параметров
                             rs.getInt("status_code"),
                             rs.getString("title"),
                             rs.getString("h1"),
                             rs.getString("description"),
+                            rs.getLong("url_id"),
                             rs.getTimestamp("created_at")
                     );
-                    urlCheck.setId(rs.getLong("id"));
                     urlChecks.add(urlCheck);
                 }
             }
@@ -64,16 +73,15 @@ public final class UrlCheckRepository extends BaseRepository {
             stmt.setLong(1, urlId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    UrlCheck urlCheck = new UrlCheck(
-                            rs.getLong("url_id"),
+                    return new UrlCheck(
+                            rs.getLong("id"),  // Используем id
                             rs.getInt("status_code"),
                             rs.getString("title"),
                             rs.getString("h1"),
                             rs.getString("description"),
+                            rs.getLong("url_id"),
                             rs.getTimestamp("created_at")
                     );
-                    urlCheck.setId(rs.getLong("id"));
-                    return urlCheck;
                 }
             }
         }

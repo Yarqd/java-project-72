@@ -41,13 +41,15 @@ public final class UrlCheckController {
                     : "";
 
             UrlCheck urlCheck = new UrlCheck(
-                    urlId,
+                    null, // id будет сгенерирован базой данных
                     200,
                     title,
                     h1,
                     description,
+                    urlId,
                     new Timestamp(System.currentTimeMillis())
             );
+
             urlCheckRepository.save(urlCheck);
 
             UrlCheckDto urlCheckDto = new UrlCheckDto(

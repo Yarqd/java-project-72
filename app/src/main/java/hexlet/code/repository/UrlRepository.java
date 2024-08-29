@@ -1,6 +1,7 @@
 package hexlet.code.repository;
 
 import hexlet.code.model.Url;
+import hexlet.code.dto.UrlDto;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -11,9 +12,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Репозиторий для работы с URL.
- */
 public final class UrlRepository extends BaseRepository {
 
     public UrlRepository(DataSource dataSource) {
@@ -34,7 +32,6 @@ public final class UrlRepository extends BaseRepository {
             stmt.setTimestamp(2, url.getCreatedAt());
             stmt.executeUpdate();
 
-            // Получение сгенерированного id
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     url.setId(generatedKeys.getLong(1));
@@ -44,23 +41,30 @@ public final class UrlRepository extends BaseRepository {
     }
 
     /**
-     * Возвращает список всех URL из базы данных.
+     * Возвращает список всех URL из базы данных с их последними проверками.
      *
-     * @return список объектов Url.
+     * @return список объектов UrlDto.
      * @throws SQLException если возникает ошибка при доступе к базе данных.
      */
-    public List<Url> findAll() throws SQLException {
-        List<Url> urls = new ArrayList<>();
-        String sql = "SELECT id, name FROM urls";
+    public List<UrlDto> findAllWithLatestChecks() throws SQLException {
+        List<UrlDto> urls = new ArrayList<>();
+        String sql = "SELECT u.id, u.name, uc.created_at, uc.status_code " +
+                "FROM urls u " +
+                "LEFT JOIN (SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id DESC, id DESC) uc " +
+                "ON u.id = uc.url_id " +
+                "ORDER BY u.id ASC";
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                Url url = new Url();
-                url.setId(rs.getLong("id"));
-                url.setName(rs.getString("name"));
-                urls.add(url);
+                UrlDto urlDto = new UrlDto(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toString() : null,
+                        rs.getObject("status_code", Integer.class)
+                );
+                urls.add(urlDto);
             }
         }
         return urls;
@@ -109,6 +113,13 @@ public final class UrlRepository extends BaseRepository {
         }
     }
 
+    /**
+     * Возвращает имя URL по его идентификатору.
+     *
+     * @param id идентификатор URL.
+     * @return имя URL или null, если URL не найден.
+     * @throws SQLException если возникает ошибка при доступе к базе данных.
+     */
     public String getUrlById(long id) throws SQLException {
         String sql = "SELECT name FROM urls WHERE id = ?";
         try (Connection conn = getConnection();

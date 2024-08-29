@@ -35,63 +35,43 @@ public final class UrlController {
 
     public void addUrl(Context ctx) {
         String inputUrl = ctx.formParam("url");
+        LOGGER.info("Input URL: " + inputUrl);
 
         try {
             URL url = new URL(inputUrl);
             String domainUrl = url.getProtocol() + "://" + url.getHost()
                     + (url.getPort() == -1 ? "" : ":" + url.getPort());
 
-            try {
-                if (urlRepository.existsByName(domainUrl)) {
-                    ctx.sessionAttribute("flash", "Страница уже существует");
-                    ctx.sessionAttribute("flashType", "error");
-                    ctx.redirect("/urls");
-                    return;
-                }
-
-                Url newUrl = new Url();
-                newUrl.setName(domainUrl);
-                newUrl.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-                urlRepository.save(newUrl);
-
-                ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                ctx.sessionAttribute("flashType", "success");
-                ctx.redirect("/urls");
-            } catch (SQLException e) {
-                LOGGER.error("Ошибка при добавлении URL", e);
-                ctx.sessionAttribute("flash", "Ошибка при добавлении URL: " + e.getMessage());
+            if (urlRepository.existsByName(domainUrl)) {
+                ctx.sessionAttribute("flash", "Страница уже существует");
                 ctx.sessionAttribute("flashType", "error");
                 ctx.redirect("/urls");
+                return;
             }
+
+            Url newUrl = new Url();
+            newUrl.setName(domainUrl);
+            newUrl.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+            urlRepository.save(newUrl);
+
+            ctx.sessionAttribute("flash", "Страница успешно добавлена");
+            ctx.sessionAttribute("flashType", "success");
+            ctx.redirect("/urls");
         } catch (MalformedURLException e) {
-            LOGGER.error("Некорректный URL", e);
+            LOGGER.error("Некорректный URL: " + inputUrl, e);
             ctx.status(400).result("Некорректный URL");
+        } catch (SQLException e) {
+            LOGGER.error("Ошибка при добавлении URL", e);
+            ctx.sessionAttribute("flash", "Ошибка при добавлении URL: " + e.getMessage());
+            ctx.sessionAttribute("flashType", "error");
+            ctx.redirect("/urls");
         }
     }
 
+
     public void listUrls(Context ctx) {
         try {
-            List<Url> urls = urlRepository.findAll();
-            List<UrlDto> urlsWithChecks = urls.stream().map(url -> {
-                try {
-                    UrlCheck latestCheck = urlCheckRepository.findLatestByUrlId(url.getId());
-                    return new UrlDto(
-                            url.getId(),
-                            url.getName(),
-                            latestCheck != null ? DATE_FORMAT.format(latestCheck.getCreatedAt()) : null,
-                            latestCheck != null ? latestCheck.getStatusCode() : null
-                    );
-                } catch (SQLException e) {
-                    LOGGER.error("Ошибка при получении проверки для URL", e);
-                    return new UrlDto(
-                            url.getId(),
-                            url.getName(),
-                            null,
-                            null
-                    );
-                }
-            }).collect(Collectors.toList());
-
+            List<UrlDto> urlsWithChecks = urlRepository.findAllWithLatestChecks();
             BasePage page = new BasePage(ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
             ctx.render("urls/urls.jte", model("page", page, "urls", urlsWithChecks));
         } catch (SQLException e) {
@@ -101,6 +81,7 @@ public final class UrlController {
             ctx.redirect("/urls");
         }
     }
+
 
     public void showUrl(Context ctx) {
         long id = Long.parseLong(ctx.pathParam("id"));
