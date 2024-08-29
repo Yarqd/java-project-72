@@ -48,11 +48,11 @@ public final class UrlRepository extends BaseRepository {
      */
     public List<UrlDto> findAllWithLatestChecks() throws SQLException {
         List<UrlDto> urls = new ArrayList<>();
-        String sql = "SELECT u.id, u.name, uc.created_at, uc.status_code " +
-                "FROM urls u " +
-                "LEFT JOIN (SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id DESC, id DESC) uc " +
-                "ON u.id = uc.url_id " +
-                "ORDER BY u.id ASC";
+        String sql = "SELECT u.id, u.name, uc.created_at, uc.status_code "
+                + "FROM urls u "
+                + "LEFT JOIN (SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id DESC, id DESC) uc "
+                + "ON u.id = uc.url_id "
+                + "ORDER BY u.id ASC";
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
