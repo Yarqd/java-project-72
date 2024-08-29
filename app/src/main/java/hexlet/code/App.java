@@ -2,7 +2,7 @@ package hexlet.code;
 
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
-import gg.jte.resolve.DirectoryCodeResolver;
+import gg.jte.resolve.ResourceCodeResolver;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import org.slf4j.Logger;
@@ -64,17 +64,10 @@ public class App {
     }
 
     private static TemplateEngine createTemplateEngine() {
-        // Используем абсолютный путь к директории jte
-        Path templatesPath = Paths.get("app/src/main/jte").toAbsolutePath();
-        DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(templatesPath);
-        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
-
-        // Логируем абсолютный путь, чтобы убедиться, что он правильно настроен
-        LOGGER.info("Creating TemplateEngine with base path: " + codeResolver.getRoot());
-
-        return templateEngine;
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        return TemplateEngine.create(codeResolver, ContentType.Html);
     }
-
 
     public static DataSource getDataSource() {
         return DATA_SOURCE;
