@@ -65,7 +65,7 @@ public class App {
 
     private static TemplateEngine createTemplateEngine() {
         // Используем абсолютный путь к директории jte
-        Path templatesPath = Paths.get("src/main/jte").toAbsolutePath();
+        Path templatesPath = Paths.get("app/src/main/jte").toAbsolutePath();
         DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(templatesPath);
         TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
 
