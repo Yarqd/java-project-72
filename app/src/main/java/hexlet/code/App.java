@@ -3,6 +3,7 @@ package hexlet.code;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.system.DatabaseConfig;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ import java.sql.Statement;
 
 public class App {
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private static final DataSource DATA_SOURCE = DatabaseConfig.getDataSource();
+    public static final DataSource DATA_SOURCE = DatabaseConfig.getDataSource();
 
     public static Javalin getApp() {
         Javalin app = Javalin.create(config -> {
@@ -65,10 +66,6 @@ public class App {
         ClassLoader classLoader = App.class.getClassLoader();
         ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
         return TemplateEngine.create(codeResolver, ContentType.Html);
-    }
-
-    public static DataSource getDataSource() {
-        return DATA_SOURCE;
     }
 
 }

@@ -12,11 +12,21 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public final class UrlCheck {
-    private Long id; // Используем объектный тип Long
+    private Long id;
     private int statusCode;
     private String title;
     private String h1;
     private String description;
     private Long urlId;
     private Timestamp createdAt;
+
+    // Конструктор без поля createdAt
+    public UrlCheck(Long id, int statusCode, String title, String h1, String description, Long urlId) {
+        this.id = id;
+        this.statusCode = statusCode;
+        this.title = title;
+        this.h1 = h1;
+        this.description = description;
+        this.urlId = urlId;
+    }
 }

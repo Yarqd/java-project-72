@@ -1,5 +1,6 @@
 package hexlet.code;
 
+import hexlet.code.system.DatabaseConfig;
 import io.javalin.Javalin;
 import hexlet.code.controllers.UrlCheckController;
 import hexlet.code.controllers.UrlController;

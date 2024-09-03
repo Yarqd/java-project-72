@@ -12,7 +12,13 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public final class Url {
-    private Long id; // Используем объектный тип Long
+    private Long id;
     private String name;
     private Timestamp createdAt;
+
+    // Конструктор без поля createdAt
+    public Url(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

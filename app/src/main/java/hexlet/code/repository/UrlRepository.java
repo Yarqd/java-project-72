@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,9 @@ public final class UrlRepository extends BaseRepository {
      * @throws SQLException если возникает ошибка при доступе к базе данных.
      */
     public void save(Url url) throws SQLException {
+        if (url.getCreatedAt() == null) {
+            url.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        }
         String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {

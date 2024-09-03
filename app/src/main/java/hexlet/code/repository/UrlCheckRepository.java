@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,9 @@ public final class UrlCheckRepository extends BaseRepository {
     }
 
     public void save(UrlCheck urlCheck) throws SQLException {
+        if (urlCheck.getCreatedAt() == null) {
+            urlCheck.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        }
         String sql = "INSERT INTO url_checks (status_code, title, h1, description, url_id, created_at)"
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
