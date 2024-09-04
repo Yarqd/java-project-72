@@ -57,6 +57,10 @@ public class App {
         }
     }
 
+    public static DataSource getDataSource() {
+        return DATA_SOURCE;
+    }
+
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "8080");
         return Integer.parseInt(port);
