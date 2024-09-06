@@ -22,7 +22,10 @@ import java.sql.Statement;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class AppTest {
@@ -55,8 +58,10 @@ class AppTest {
 
             statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
 
-            String schemaSql = "CREATE TABLE urls (id IDENTITY PRIMARY KEY, name VARCHAR(255), created_at TIMESTAMP);" +
-                    "CREATE TABLE url_checks (id IDENTITY PRIMARY KEY, status_code INT, title VARCHAR(255), h1 VARCHAR(255), description VARCHAR(255), url_id BIGINT, created_at TIMESTAMP, FOREIGN KEY (url_id) REFERENCES urls(id));";
+            String schemaSql = "CREATE TABLE urls (id IDENTITY PRIMARY KEY, name VARCHAR(255), created_at TIMESTAMP);"
+                    + "CREATE TABLE url_checks (id IDENTITY PRIMARY KEY, status_code INT, title VARCHAR(255),"
+                    + "h1 VARCHAR(255), description VARCHAR(255), url_id BIGINT, created_at TIMESTAMP,"
+                    + "FOREIGN KEY (url_id) REFERENCES urls(id));";
             statement.execute(schemaSql);
         }
     }
