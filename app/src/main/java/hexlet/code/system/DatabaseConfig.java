@@ -2,26 +2,33 @@ package hexlet.code.system;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
 import javax.sql.DataSource;
 
 public class DatabaseConfig {
 
-    private static final String H2_URL = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1";
-    private static final String H2_USERNAME = "sa";
-    private static final String H2_PASSWORD = "";
-
-    private static final String POSTGRES_URL = "jdbc:postgresql://dpg-csck1dij1k6c739buutg-a.frankfurt-postgres.render.com:5432/dbname_w2y3";
-    private static final String POSTGRES_USERNAME = "dbname_w2y3_user";
-    private static final String POSTGRES_PASSWORD = "YWXdq9IHOpaAK7SjA0TF7JgmZNnabXbD";
+    private static final String DEFAULT_H2_URL = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1";
+    private static final String DEFAULT_H2_USERNAME = "sa";
+    private static final String DEFAULT_H2_PASSWORD = "";
 
     public static DataSource getDataSource() {
         HikariConfig config = new HikariConfig();
 
-        // Прямое использование PostgreSQL
-        String dbUrl = POSTGRES_URL;
+        // Получение значений из переменных окружения
+        String dbUrl = System.getenv("JDBC_DATABASE_URL");
+        String dbUsername = System.getenv("DB_USERNAME");
+        String dbPassword = System.getenv("DB_PASSWORD");
+
+        // Проверка на случай отсутствия переменных окружения (используем H2 как запасной вариант)
+        if (dbUrl == null || dbUsername == null || dbPassword == null) {
+            dbUrl = DEFAULT_H2_URL;
+            dbUsername = DEFAULT_H2_USERNAME;
+            dbPassword = DEFAULT_H2_PASSWORD;
+        }
+
         config.setJdbcUrl(dbUrl);
-        config.setUsername(POSTGRES_USERNAME);
-        config.setPassword(POSTGRES_PASSWORD);
+        config.setUsername(dbUsername);
+        config.setPassword(dbPassword);
 
         return new HikariDataSource(config);
     }
