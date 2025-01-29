@@ -11,30 +11,35 @@ public class DatabaseConfig {
     private static final String DEFAULT_H2_USERNAME = "sa";
     private static final String DEFAULT_H2_PASSWORD = "";
 
+    private static final String DEFAULT_DB_URL = "jdbc:postgresql://"
+            + "dpg-cud1hftumphs73des6eg-a.frankfurt-postgres.render.com/db_rgxt";
+    private static final String DEFAULT_DB_USERNAME = "db_rgxt_user";
+    private static final String DEFAULT_DB_PASSWORD = "1C5MiauLdmbeq3x5pyau21VOWAHEhenL";
+
     public static DataSource getDataSource() {
         HikariConfig config = new HikariConfig();
 
-        // Получение значений из переменных окружения
+        // Читаем переменные окружения
         String dbUrl = System.getenv("JDBC_DATABASE_URL");
         String dbUsername = System.getenv("DB_USERNAME");
         String dbPassword = System.getenv("DB_PASSWORD");
 
         if (dbUrl == null || dbUsername == null || dbPassword == null) {
-            // Используем H2 как запасной вариант
-            System.out.println("Environment variables for the database are not set. Using H2 in-memory database.");
+            System.out.println("Переменные окружения не установлены. Используем H2.");
             dbUrl = DEFAULT_H2_URL;
             dbUsername = DEFAULT_H2_USERNAME;
             dbPassword = DEFAULT_H2_PASSWORD;
+            config.setDriverClassName("org.h2.Driver");
         } else {
-            System.out.println("Connecting to PostgreSQL database with URL: " + dbUrl);
+            System.out.println("Подключаемся к PostgreSQL: " + dbUrl);
+            config.setDriverClassName("org.postgresql.Driver");
         }
 
         config.setJdbcUrl(dbUrl);
         config.setUsername(dbUsername);
         config.setPassword(dbPassword);
 
-        // Настройка пула соединений HikariCP для оптимальной работы
-        config.setDriverClassName("org.postgresql.Driver");
+        // Оптимизация HikariCP
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
